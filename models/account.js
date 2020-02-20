@@ -8,7 +8,12 @@ var Account = new Schema({
     email: String,
     created: { type: Date, default: function(){
         return new Date();
-    }}
+    }},
+    data: Object,
+    status: Object,
+    accessToken: String,
+    refreshToken: String,
+    mpin: String
 });
 
 var options = {

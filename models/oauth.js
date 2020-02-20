@@ -25,17 +25,14 @@ var GrantCodeSchema = new Schema({
 });
 
 var AccessTokenSchema = new Schema({
-	token: { type: String, unique: true, default: function() {
-			return uid(124);
-		}
-	},
+	token: { type: String},
 	user: { type: Schema.Types.ObjectId, ref: 'Account' },
 	application: { type: Schema.Types.ObjectId, ref: 'Application' },
 	grant: { type: Schema.Types.ObjectId, ref: 'GrantCode' },
 	scope: [ { type: String }],
 	expires: { type: Date, default: function(){
 		var today = new Date();
-		var length = 10; // Length (in minutes) of our access token
+		var length = 5; // Length (in minutes) of our access token
 		return new Date(today.getTime() + length*60000);
 	} },
 	active: { type: Boolean, get: function(value) {
@@ -48,9 +45,7 @@ var AccessTokenSchema = new Schema({
 });
 
 var RefreshTokenSchema = new Schema({
-	token: { type: String, unique: true, default: function(){
-		return uid(124);
-	}},
+	token: { type: String},
 	user: { type: Schema.Types.ObjectId, ref: 'Account' },
 	application: { type: Schema.Types.ObjectId, ref: 'Application' }
 });

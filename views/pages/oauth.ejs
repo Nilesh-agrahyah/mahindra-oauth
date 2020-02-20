@@ -1,54 +1,106 @@
 <html>
+
 <head>
-    <title>Authorise app</title>
-
+    <title>Honda</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 </head>
-<body>
+
+<body style="background-image: radial-gradient(#3E3E3E, #151515);">
+    <div class="container-fluid">
+        <div class="row">
+          <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+            <div
+              class="card text-center"
+              style="background-color: transparent; margin-top: 50px; border: 0px;"
+            >
+              <div class="card-body">
+                <img
+                  src="https://alexa-oauth.herokuapp.com/honda-connect.png"
+                  class="img-fluid"
+                  style="width: 60%;"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    <div class="container-fluid" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <div class="card text-center"  style="border: 0px; background-color: transparent; font-family: 'Roboto';color: #ffffff; font-size: 16px;">
+        <div class="card-body">
+            <p class="card-text" >
+                <form action="/auth/finish" method="post">
+                    <input type="hidden" name="transaction_id" value="<%= transaction_id %>">
+                    <input type="hidden" name="response_type" value="<%= response_type %>">
+            
+                    <input type="hidden" name="client_id" value="<%= application.oauth_id %>">
+                    <input type="hidden" name="auth_url" value="<%= decodeURIComponent(currentURL) %>">
+                    <input type="hidden" name="scope" value="<%= scope%>">
+                    <input type="hidden" name="state" value="<%= state%>">
+                    <input type="hidden" name="redirect_uri" value="<%= redirectURI%>">
+                    
+
+                    <div class="">
+                        
+                            <p><%= application.title %> requires permission to:</p><br\>
+                            
+                                <% scope.forEach(function(i){ %>
+                                <p><%= map[i] %></p>
+                                <% });%>
+                            
+                        
+ 
+
+                        <% if (user) { %>
+                        <p>Click <em>Authorise</em> to allow this app access</p>
+                        <% } else { %>
+                        <% } %>
+                        <div class="">
+
+
+                            <% if (user) { %>
+                            <div class="form-group">
+                                <p>Signed in as <strong><%= user.username%></strong>.</p><br>
+                                <input type="submit" style="display: none;" class="btn btn-primary btn-block" value="Authorise"><br>
+                                <a href="/logout?next=<%= currentURL %>">Not <%= user.username %> </a>?
+
+                            </div>
+                            <% } else { %>
+                                <p style="display: none;">Signed in as <strong><%= customerName %></strong>.</p><br>                 
+                            <div class="form-group" style="display: none;">
+                                <label for="username">Username: </label>
+                                <input type="text" id="username" name="username" value="<%= customerName %>"/>
+                            </div>
+                            <div style="display: none;">
+                                <label for="password">Password: </label>
+                                <input type="password" id="password" name="password" value="<%= customerId %>">
+                            </div>
+                            <div>
+                                <input class="btn btn-danger btn-block" type="submit" value="Authorize" style="background-color: #cc0000;">
+                            </div>
+                        </div>
+                        <% } %>
+                </form>
+            </p>
+        </div>
+    </div>
+            </div>
+        </div>
+    </div>
+    
+
     <% if (this.message) { %>
-        <p><strong><%= message %></strong></p>
+    <p><strong><%= message %></strong></p>
     <% } %>
-	<h1>Connect to <%= application.title %></h1>
-	<form action="/auth/finish" method="post">
-		<input type="hidden" name="transaction_id" value="<%= transaction_id %>">
-        <input type="hidden" name="response_type" value="<%= response_type %>">
-        <input type="hidden" name="client_id" value="<%= application.oauth_id %>">
-        <input type="hidden" name="auth_url" value="<%= decodeURIComponent(currentURL) %>">
-        <input type="hidden" name="scope" value="<%= scope.join(',') %>">
 
-        <div class="">
-            <p><%= application.title %> requires permission to:</p>
-            <ul>
-                <% scope.forEach(function(i){ %>
-                    <li><%= map[i] %></li>
-                <% });%>
-            </ul>
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
-            <% if (user) { %>
-                <p>Click <em>Authorise</em> to allow this app access</p>
-            <% } else { %>
-                <p>Please sign in to allow this app access</p>
-            <% } %>
-        <div>
-
-        <% if (user) { %>
-            <div class="form-group">
-                <p>Signed in as <strong><%= user.name%></strong>.</p>
-                <a href="/logout?next=<%= currentURL %>">Not </a><%= user.username %>?
-                <input type="submit" value="Authorise">
-            </div>
-        <% } else { %>
-            <div class="form-group">
-                <label for="username">Username: </label>
-                <input type="text" id="username" name="username"/>
-            </div>
-            <div>
-                <label for="password">Password: </label>
-                <input type="password" id="password" name="password">
-            </div>
-            <div>
-                <input type="submit" value="Authorise">
-            </div>
-        <% } %>
-	</form>
 </body>
 </html>

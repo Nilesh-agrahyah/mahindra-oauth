@@ -1,0 +1,316 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+      integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+      crossorigin="anonymous"
+    />
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto&display=swap"
+      rel="stylesheet"
+    />
+    <title>Honda Login</title>
+    <style>
+      #hondaNum {
+        border: none;
+        background-color: transparent;
+        outline: none;
+        font-size: 25px;
+        color: #ffffff;
+        width: 300px;
+        height: 30px;
+        caret-color: #cc0000;
+      }
+      body {
+        background-image: radial-gradient(#3e3e3e, #151515);
+        font-family: "Roboto";
+        color: #ffffff;
+        font-size: 12px;
+        box-shadow: transparent;
+      }
+      .btn {
+        background-color: #cc0000;
+        width:100px;
+        padding:5px;
+      }
+      #partitioned {
+        padding-left: 15px;
+        letter-spacing: 42px;
+        border: 0;
+        background-color: transparent;
+        background-image: linear-gradient(to left, #ffffff 70%, rgba(255, 255, 255, 0) 0%);
+        background-position: bottom;
+        background-size: 50px 1px;
+        background-repeat: repeat-x;
+        background-position-x: 35px;
+        width: 220px;
+        min-width: 220px;
+        caret-color: #cc0000;
+        color:#ffffff;
+        outline: none;
+        -webkit-text-security: disc !important;
+      }
+
+      #divInner{
+        left: 0;
+        position: sticky;
+      }
+
+      #divOuter{
+        width: 190px; 
+        overflow: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <div
+            class="card text-center"
+            style="background-color: transparent; margin-top: 50px; border: 0px;"
+          >
+            <div class="card-body">
+              <img
+                src="https://oauthserver2.herokuapp.com/honda-connect.png"
+                class="img-fluid"
+                style="width: 60%;"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="container-fluid"
+      style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"
+    >
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+          <div
+            class="card"
+            style="background-color:transparent; border: 0px;"
+          >
+            <div class="card-body" style="background-color: transparent;">
+              <% if(otpSent == false){ %>
+              <form method="POST" action="/honda/primary">
+                <p style="font-size: 16px;">Getting Started</p>
+                <p style="color: #B1B1B1;">Login via mobile number</p>
+                <input
+                  type="number"
+                  name="primaryMobileNo"
+                  placeholder="9999999999"
+                  maxlength="10"
+                  required
+                  id="hondaNum"
+                />&nbsp;
+                <input type="hidden" name="clientId" value="<%= clientId %>" />
+                <input type="hidden" name="scope" value="<%= scope %>" />
+                <input
+                  type="hidden"
+                  name="redirectURI"
+                  value="<%= redirectURI %>"
+                />
+                <input
+                  type="hidden"
+                  name="responseType"
+                  value="<%= responseType %>"
+                />
+                <input type="hidden" name="state" value="<%= state %>" /><br /><br />
+                <input
+                  class="btn btn-sm btn-danger"
+                  type="submit"
+                  value="Next"
+                />
+                <% if(fail == true){ %>
+                <p class="alert alert-dark">
+                  Provided number <%= number %> is not registered, Please enter
+                  the primary number again.
+                </p>
+                <% } %>
+              </form>
+              <% } %> <% if(otpSent == true){ %>
+              <form method="POST" , action="/honda/verifyOtp">
+                <p style="font-size: 16px;">Getting Started</p>
+                <p style="color: #B1B1B1;">
+                  OTP sent to <%= number %>
+                </p>
+                <div id="divOuter">
+                  <div id="divInner">
+                    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js">
+                      var obj = document.getElementById('partitioned');
+                      obj.addEventListener('keydown', stopCarret); 
+                      obj.addEventListener('keyup', stopCarret); 
+
+                      function stopCarret() {
+                        if (obj.value.length > 3){
+                          setCaretPosition(obj, 3);
+                        }
+                      }
+
+                      function setCaretPosition(elem, caretPos) {
+                          if(elem != null) {
+                              if(elem.createTextRange) {
+                                  var range = elem.createTextRange();
+                                  range.move('character', caretPos);
+                                  range.select();
+                              }
+                              else {
+                                  if(elem.selectionStart) {
+                                      elem.focus();
+                                      elem.setSelectionRange(caretPos, caretPos);
+                                  }
+                                  else
+                                      elem.focus();
+                              }
+                          }
+                      }
+                    </script>
+                    <input id="partitioned" type="number" maxlength="4" name="otp" required/>
+                  </div>
+                </div>
+                <!-- <input
+                  type="number"
+                  name="otp"
+                  placeholder="OTP"
+                  maxlength="4"
+                  required
+                  class="form-control"
+                /> -->
+                <input type="hidden" value="<%= number %>" name="number"/>
+                <br />
+                <input
+                  class="btn btn-sm btn-danger"
+                  type="submit"
+                  value="Next"
+                />
+                <input
+                  class="btn btn-default"
+                  id="resend"
+                  style="border:0px; background-color: transparent; color: #B5965E; float: right;"
+                  type="button"
+                  value="Resend OTP"
+                />
+                <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+                <script>
+                  $(document).ready(function() {
+                    $("#resend").click(function() {
+                      var number = "<%= number %>";
+                      var settings = {
+                        url:
+                          "https://testapi.hondaconnect.in/bos/customer/verifyPrimaryContactNo",
+                        method: "POST",
+                        timeout: 0,
+                        headers: {
+                          "Content-Type": "application/json",
+                          "Authorization": "Basic YwYzigQsp5v15WmH8SVxgsgQQpJN2Ut9ckapuHN7QEGbUxmLOYRaNRFmS7pkySEk+WEzlMAuWmryrh2UgA=="
+                        },
+                        data: JSON.stringify({
+                          primaryMobileNo: number,
+                          emailId: ""
+                        })
+                      };
+
+                      $.ajax(settings).done(function(response) {
+                         console.log(response);
+                        var settings = {
+                          url: "https://oauthserver2.herokuapp.com/resendOtp",
+                          method: "POST",
+                          timeout: 0,
+                          headers: {
+                            "Content-Type": "application/json"
+                          },
+                          data: JSON.stringify({ otp: response.data.generatedOtp, key: response.data.key })
+                        };
+
+                        $.ajax(settings).done(function(response) {
+                          console.log(response);
+                        });
+                      });
+                    });
+                  });
+                </script>
+                <% if(otpVerified == false){ %>
+                <p class="alert alert-dark">
+                  OTP not verified!
+                </p>
+                <%} %>
+              </form>
+
+              <% } %> <% if(otpVerified == true){ %>
+              <form method="POST" , action="/honda/verifyMpin">
+                <p style="font-size: 16px;">OTP verified!</p>
+                <label style="color: #B1B1B1;">Enter your mPIN</label>&nbsp;
+                <div id="divOuter">
+                  <div id="divInner">
+                    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js">
+                      var obj = document.getElementById('partitioned');
+                      obj.addEventListener('keydown', stopCarret); 
+                      obj.addEventListener('keyup', stopCarret); 
+
+                      function stopCarret() {
+                        if (obj.value.length > 3){
+                          setCaretPosition(obj, 3);
+                        }
+                      }
+
+                      function setCaretPosition(elem, caretPos) {
+                          if(elem != null) {
+                              if(elem.createTextRange) {
+                                  var range = elem.createTextRange();
+                                  range.move('character', caretPos);
+                                  range.select();
+                              }
+                              else {
+                                  if(elem.selectionStart) {
+                                      elem.focus();
+                                      elem.setSelectionRange(caretPos, caretPos);
+                                  }
+                                  else
+                                      elem.focus();
+                              }
+                          }
+                      }
+                    </script>
+                    <input id="partitioned" type="number" maxlength="4" name="mpin" required/>
+                  </div>
+                </div>
+                <input type="hidden" value="<%= number %>" name="number"/>
+                <br />
+                <input
+                  class="btn btn-danger btn-sm"
+                  type="submit"
+                  value="Login"
+                />
+                <% if(mpinVerified == false){ %>
+                <p>Wrong mPIN, Please try again..</p>
+                <% }%>
+              </form>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+      integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+      integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
