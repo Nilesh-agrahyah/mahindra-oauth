@@ -178,7 +178,7 @@ app.post(
     if (req.query.next) {
       res.redirect(req.query.next);
     } else {
-      res.send(`https://oauthserver2.herokuapp.com/auth/start`); //Change according to host used
+      res.redirect(`/`); //Change according to host used
     }
   }
 );
