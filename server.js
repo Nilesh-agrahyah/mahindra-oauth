@@ -1,9 +1,6 @@
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"; //NOT RECOMMENDED, remove once deployed on a HTTPS server
-var fs = require("fs");
 var url = require("url");
 var http = require("http");
-//As this was deployed on Heroku, it requires server.js to use http protocol instead of https, uncomment if your host requires https and change http  to https throughout
-// var https = require('https');
+var unirest = require('unirest');
 var flash = require("connect-flash");
 var morgan = require("morgan");
 var express = require("express");
@@ -18,8 +15,6 @@ var cookieSession = require("cookie-session");
 const request = require("request");
 var oauthServer = require("./oauth");
 const account = require("./models/account");
-const baseURL = "";
-const key = require("./config/key");
 
 var port = process.env.VCAP_APP_PORT || process.env.PORT || 3000;
 var host = process.env.VCAP_APP_HOST || "0.0.0.0";
@@ -148,7 +143,15 @@ function ensureAuthenticated(req, res, next) {
 }
 
 app.get("/", function(req, res) {
-  res.render("pages/index", { user: req.user, home: true });
+  res.render("pages/index", { 
+    user: req.user,
+    home: true,
+    clientId: req.query.client_id,
+    responseType: req.query.response_type,
+    redirectURI: req.query.redirect_uri,
+    scope: req.query.scope,
+    state: req.query.state
+   });
 });
 
 app.get("/login", function(req, res) {
@@ -192,7 +195,8 @@ app.post("/newuser", function(req, res) {
     new Account({
       username: req.body.username,
       email: req.body.email,
-      mqttPass: "foo"
+      mqttPass: "foo",
+      phNo: req.body.phNo
     }),
     req.body.password,
     function(err, account) {
@@ -203,30 +207,48 @@ app.post("/newuser", function(req, res) {
 
       passport.authenticate("local")(req, res, function() {
         console.log("created new user %s", req.body.username);
-        res.status(201).send();
+        res.status(201).send("New user added");
       });
     }
   );
 });
 
 class bufferData{
-  constructor(phoneNo, responseS, resOtp, resKey, sentOpt, resData, custId, custName, custEmail, optStat, submittedMpin, clientId, state){
-    this.phoneNo = phoneNo
-    this.responseS = responseS
-    this.resOtp = resOtp
-    this.resKey = resKey
-    this.sentOtp = sentOpt
-    this.resData = resData
+  constructor(custId, name, clientId, state, scope, responseType, redirectURI){
     this.custId = custId
-    this.custName = custName
-    this.custEmail = custEmail
-    this.optStat = optStat
-    this.submittedMpin = submittedMpin
+    this.name = name
     this.clientId = clientId
     this.state = state
+    this.scope = scope
+    this.responseType = responseType
+    this.redirectURI = redirectURI
   }
 } 
-let data = new bufferData(undefined, undefined, undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined,undefined, undefined, undefined);
+
+let data = new bufferData(undefined,undefined,undefined,undefined,undefined, undefined, undefined)
+
+app.post('/mahindra/newuser', (request,response)=>{
+  data.clientId = request.body.clientId;
+  data.scope = request.body.scope;
+  data.responseType = request.body.responseType;
+  data.redirectURI = request.body.redirectURI;
+  data.state = request.body.state;
+  var req = unirest('POST', 'http://localhost:3000/newuser')
+  .headers({
+    'Content-Type': 'application/x-www-form-urlencoded'
+  })
+  .send(`username=${request.body.name}`)
+  .send(`phNo=${request.body.phNo}`)
+  .send(`email=${request.body.email}`)
+  .send(`password=mahindra@123`)
+  .end(function (res) { 
+    if (res.error) throw new Error(res.error); 
+    return console.log(res.raw_body);
+  });
+  response.redirect(
+    `http://localhost:3000/auth/start?scope=${data.scope}&client_id=${data.clientId}&redirect_uri=${data.redirectURI}&response_type=${data.responseType}&CustName=${data.name}&CustId=${data.customerId}&state=${data.state}`
+  );
+})
 
 app.get(
   "/auth/start",
@@ -283,7 +305,7 @@ app.get(
     );
     var scopeMap = {
       // ... display strings for all scope variables ...
-      access_devices: "Access to Honda Connect account",
+      access_devices: "Access to Mahidra account details",
       create_devices: "create new devices."
     };
 

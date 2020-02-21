@@ -24,6 +24,7 @@
 	</style>
 </head>
 <body>
+
 	<div class="container">
 		<div class="row" >
 			<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
@@ -45,14 +46,18 @@
 					<h4>Welcome to Mahindra</h4>
 					<p>Please provide your details to proceed with Alexa's Smart Home Skill account linking features.</p>
 					<div class="container">
-						<form>
+						<form method="POST" action="/mahindra/newuser">
+							<input type="hidden" name="clientId" value="<%= clientId %>" />
+							<input type="hidden" name="scope" value="<%= scope %>" />
+							<input type="hidden" name="redirectURI" value="<%= redirectURI %>"/>
+							<input type="hidden" name="responseType" value="<%= responseType %>"/>
 							<div class="form-group">
 								<label for="phNo">Primary mobile number:</label>
 								<input type="tel" name="phNo" pattern=".{10}" maxlength="10" class="form-control" placeholder="9999999999" required>
 							  </div>
 							  <div class="form-group">
 								<label for="name">Full name:</label>
-								<input type="text" class="form-control" placeholder="John Wick" required>
+								<input type="text" name="name" class="form-control" placeholder="John Wick" required>
 							  </div>
 							<div class="form-group">
 							  <label for="email">Email:</label>

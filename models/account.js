@@ -9,11 +9,7 @@ var Account = new Schema({
     created: { type: Date, default: function(){
         return new Date();
     }},
-    data: Object,
-    status: Object,
-    accessToken: String,
-    refreshToken: String,
-    mpin: String
+    phNo: String
 });
 
 var options = {
