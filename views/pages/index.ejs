@@ -46,18 +46,19 @@
 					<h4>Welcome to Mahindra</h4>
 					<p>Please provide your details to proceed with Alexa's Smart Home Skill account linking features.</p>
 					<div class="container">
-						<form method="POST" action="/mahindra/newuser">
+						<form method="POST" action="/mahindra/newuser" autocomplete="off">
 							<input type="hidden" name="clientId" value="<%= clientId %>" />
 							<input type="hidden" name="scope" value="<%= scope %>" />
 							<input type="hidden" name="redirectURI" value="<%= redirectURI %>"/>
 							<input type="hidden" name="responseType" value="<%= responseType %>"/>
+							<input type="hidden" name="state" value="<%= state %>"/>
 							<div class="form-group">
 								<label for="phNo">Primary mobile number:</label>
 								<input type="tel" name="phNo" pattern=".{10}" maxlength="10" class="form-control" placeholder="9999999999" required>
 							  </div>
 							  <div class="form-group">
 								<label for="name">Full name:</label>
-								<input type="text" name="name" class="form-control" placeholder="John Wick" required>
+								<input type="text" name="name" class="form-control" placeholder="John" required>
 							  </div>
 							<div class="form-group">
 							  <label for="email">Email:</label>

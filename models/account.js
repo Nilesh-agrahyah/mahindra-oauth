@@ -9,7 +9,7 @@ var Account = new Schema({
     created: { type: Date, default: function(){
         return new Date();
     }},
-    phNo: String
+    fullname: String
 });
 
 var options = {

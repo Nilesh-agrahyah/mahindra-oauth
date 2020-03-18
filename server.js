@@ -1,12 +1,10 @@
 var url = require("url");
-var http = require("http");
-var unirest = require('unirest');
 var flash = require("connect-flash");
 var morgan = require("morgan");
 var express = require("express");
 var passport = require("passport");
 var mongoose = require("mongoose");
-var bodyParser = require("body-parser"); 
+var bodyParser = require("body-parser");
 var BasicStrategy = require("passport-http").BasicStrategy;
 var LocalStrategy = require("passport-local").Strategy;
 var PassportOAuthBearer = require("passport-http-bearer");
@@ -23,13 +21,13 @@ var mongo_url = process.env.MONGO_URL || "mongodb://localhost/MahindraUserDB";
 mongoose.Promise = global.Promise;
 var mongoose_options = {
   auto_reconnect: true,
-    useNewUrlParser: true,
-    useUnifiedTopology: true
+  useNewUrlParser: true,
+  useUnifiedTopology: true
 };
 var mongoose_connection = mongoose.connection;
 
 mongoose_connection.on("connecting", function() {
-  console.log(`connecting to MongoDB URL... -> ${mongo_url}`);
+  console.log(`***connecting to MongoDB URL -> ${mongo_url}***`);
 });
 
 mongoose_connection.on("error", function(error) {
@@ -38,15 +36,15 @@ mongoose_connection.on("error", function(error) {
 });
 
 mongoose_connection.on("connected", function() {
-  console.log("MongoDB connected!");
+  console.log("***MongoDB connected!***");
 });
 
 mongoose_connection.once("open", function() {
-  console.log("MongoDB connection opened!");
+  console.log("***MongoDB connection opened!***");
 });
 
 mongoose_connection.on("reconnected", function() {
-  console.log("MongoDB reconnected!");
+  console.log("***MongoDB reconnected!***");
 });
 
 mongoose_connection.on("disconnected", function() {
@@ -55,20 +53,19 @@ mongoose_connection.on("disconnected", function() {
 
 mongoose.connect(mongo_url, mongoose_options);
 
-mongoose.set('useFindAndModify', false);
-mongoose.set('useCreateIndex', true);
-
+mongoose.set("useFindAndModify", false);
+mongoose.set("useCreateIndex", true);
 
 var Account = require("./models/account");
 var oauthModels = require("./models/oauth");
-var app_id = "https://oauthserver2.herokuapp.com/:" + port; //Change according to host used
+var app_id = "http://localhost:3000"; //Change according to host used
 
 var app = express();
 
 app.set("view engine", "ejs");
 app.enable("trust proxy");
-app.use(express.static('public'));
-app.use(morgan("combined"));
+app.use(express.static("public"));
+app.use(morgan("tiny"));
 app.use(
   cookieSession({
     keys: ["secret1", "secret2"]
@@ -134,16 +131,22 @@ var accessTokenStrategy = new PassportOAuthBearer(function(token, done) {
 
 passport.use(accessTokenStrategy);
 
-function ensureAuthenticated(req, res, next) {
+/* function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
     return next();
   } else {
     res.redirect("/login");
   }
-}
+} */
 
-app.get("/", function(req, res) {
-  res.render("pages/index", { 
+app.get("/mahindra/register", function(req, res) {
+  data.clientId = req.query.client_id;
+  data.scope = req.query.scope;
+  data.responseType = req.query.response_type;
+  data.redirectURI = req.query.redirect_uri;
+  data.state = req.query.state;
+  // data.number = req.body.phNo;
+  res.render("pages/index", {
     user: req.user,
     home: true,
     clientId: req.query.client_id,
@@ -151,7 +154,16 @@ app.get("/", function(req, res) {
     redirectURI: req.query.redirect_uri,
     scope: req.query.scope,
     state: req.query.state
-   });
+  });
+  console.log(
+    `***Register pages query params: ${JSON.stringify({
+      clientId: req.query.client_id,
+      responseType: req.query.response_type,
+      redirectURI: req.query.redirect_uri,
+      scope: req.query.scope,
+      state: req.query.state
+    })} ***`
+  );
 });
 
 app.get("/login", function(req, res) {
@@ -181,7 +193,7 @@ app.post(
     if (req.query.next) {
       res.redirect(req.query.next);
     } else {
-      res.redirect(`/`); //Change according to host used
+      res.send(`${app_id}/auth/start`); //Change according to host used
     }
   }
 );
@@ -190,13 +202,14 @@ app.get("/newuser", function(req, res) {
   res.render("pages/register", { user: req.user });
 });
 
-app.post("/newuser", function(req, res) {
+app.post("/newuser", async function(req, res) {
+
   Account.register(
     new Account({
       username: req.body.username,
       email: req.body.email,
       mqttPass: "foo",
-      phNo: req.body.phNo
+      fullname: req.body.fullname
     }),
     req.body.password,
     function(err, account) {
@@ -213,47 +226,122 @@ app.post("/newuser", function(req, res) {
   );
 });
 
-class bufferData{
-  constructor(custId, name, clientId, state, scope, responseType, redirectURI){
-    this.custId = custId
-    this.name = name
-    this.clientId = clientId
-    this.state = state
-    this.scope = scope
-    this.responseType = responseType
-    this.redirectURI = redirectURI
+class bufferData {
+  constructor(
+    custId,
+    number,
+    clientId,
+    state,
+    scope,
+    responseType,
+    redirectURI,
+    response
+  ) {
+    this.custId = custId;
+    this.number = number;
+    this.clientId = clientId;
+    this.state = state;
+    this.scope = scope;
+    this.responseType = responseType;
+    this.redirectURI = redirectURI;
+    this.response = response
   }
-} 
+}
 
-let data = new bufferData(undefined,undefined,undefined,undefined,undefined, undefined, undefined)
+let data = new bufferData(
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined,
+  undefined
+);
 
-app.post('/mahindra/newuser', (request,response)=>{
-  data.clientId = request.body.clientId;
-  data.scope = request.body.scope;
-  data.responseType = request.body.responseType;
-  data.redirectURI = request.body.redirectURI;
-  data.state = request.body.state;
-  var req = unirest('POST', 'http://localhost:3000/newuser')
-  .headers({
-    'Content-Type': 'application/x-www-form-urlencoded'
-  })
-  .send(`username=${request.body.name}`)
-  .send(`phNo=${request.body.phNo}`)
-  .send(`email=${request.body.email}`)
-  .send(`password=mahindra@123`)
-  .end(function (res) { 
-    if (res.error) throw new Error(res.error); 
-    return console.log(res.raw_body);
-  });
-  response.redirect(
-    `http://localhost:3000/auth/start?scope=${data.scope}&client_id=${data.clientId}&redirect_uri=${data.redirectURI}&response_type=${data.responseType}&CustName=${data.name}&CustId=${data.customerId}&state=${data.state}`
+app.post("/mahindra/newuser", async (req, res) => {
+  data.clientId = req.body.clientId;
+  data.scope = req.body.scope;
+  data.responseType = req.body.responseType;
+  data.redirectURI = req.body.redirectURI;
+  data.state = req.body.state;
+  data.number = req.body.phNo;
+  console.log(
+    `***Data stored in Buffer class: ${{
+      clientId: data.clientId,
+      responseType: data.responseType,
+      redirectURI: data.redirectURI,
+      scope: data.scope,
+      state: data.state,
+      phNo: data.number
+    }} ***`
   );
-})
+
+  
+  let checkNoExists = await Account.findOne({username: req.body.phNo});
+
+  console.log(`***value of check is no already exists: ${checkNoExists}***`);
+  if(checkNoExists == null){
+    var options = {
+      method: "POST",
+      url: `${app_id}/newuser`,
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      form: {
+        'username': req.body.phNo,
+        'fullname': req.body.name,
+        'email': req.body.email,
+        'password': "mahindratest@123"
+      }
+    };
+    request(options, function(error, response) {
+      if (error) {
+        return res.send({ status: 403 });
+      }
+      console.log(options);
+      console.log("Response from POST 'newuser': ", response.body);
+    });
+  }else{
+    checkNoExists.email = req.body.email;
+    checkNoExists.fullname = req.body.name;
+    await checkNoExists.save();
+    // console.log("User details updated: ",userUpdate)
+  }
+  res.redirect(
+    `${app_id}/auth/start?scope=${data.scope}&client_id=${data.clientId}&redirect_uri=${data.redirectURI}&response_type=${data.responseType}&CustNo=${data.number}&state=${data.state}`
+  );
+
+});
+
+// app.post("/mahindra/login", (req, res) => {
+//   var options = {
+//     method: "POST",
+//     url: `${app_id}/newuser`,
+//     headers: {
+//       "Content-Type": "application/x-www-form-urlencoded"
+//     },
+//     form: {
+//       username: req.query.CustNo,
+//       password: "mahindra@123"
+//     }
+//   };
+
+//   request(options, function(error, response) {
+//     if (error) {
+//       return res.send({ status: 403 });
+//     }
+//     console.log(options);
+//     console.log("Response from POST 'newuser': ", response.body);
+//     res.redirect(
+//       `${app_id}/auth/start?scope=${data.scope}&client_id=${data.clientId}&redirect_uri=${data.redirectURI}&response_type=${data.responseType}&CustNo=${req.body.phNo}&state=${data.state}`
+//     );
+//   });
+// });
 
 app.get(
   "/auth/start",
   oauthServer.authorize(function(applicationID, redirectURI, done) {
-    console.log("applicationID " + applicationID)
+    console.log("applicationID " + applicationID);
     oauthModels.Application.findOne({ oauth_id: applicationID }, async function(
       error,
       application
@@ -297,11 +385,7 @@ app.get(
   function(req, res) {
     //console.log("value of req in request iside auth start" + (req.oauth2.req))
     console.log(
-      "value of CustName in request iside auth start" + req.query.CustName
-    );
-
-    console.log(
-      "value of CustId in request iside auth start" + req.query.CustId
+      "value of CustName in request iside auth start" + req.query.CustNo
     );
     var scopeMap = {
       // ... display strings for all scope variables ...
@@ -316,8 +400,7 @@ app.get(
       errors: req.flash("error"),
       scope: req.oauth2.req.scope,
       application: req.oauth2.client,
-      customerId: req.query.CustId,
-      customerName: req.query.CustName,
+      customerNo: req.query.CustNo,
       redirectURI: req.query.redirect_uri,
       user: req.user,
       map: scopeMap,
@@ -476,19 +559,6 @@ app.get("/test", (req, res) => {
   res.end();
 });
 
-var server = http.Server(app);
-// if (app_id.match(/^http:\/\/localhost:/)) {
-// 	var options = {
-// 		key: fs.readFileSync('server.key'),
-// 		cert: fs.readFileSync('server.crt')
-// 	};
-// 	server = http.createServer(options, app);
-// }
-
-server.listen(port, host, function() {
-  console.log("App listening on  %s:%d!", host, port);
-  console.log("App_ID -> %s", app_id);
-
-  setTimeout(function() {}, 5000);
-}); 
- 
+app.listen(port, () =>
+  console.log("***OAuth server running on port " + port + "***")
+);
