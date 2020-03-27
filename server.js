@@ -306,35 +306,57 @@ app.post("/mahindra/newuser", async (req, res) => {
       }
       console.log(options);
       console.log("Response from POST 'newuser': ", response.body);
+      var options = {
+        method: "POST",
+        url: `${app_id}/login`,
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        form: {
+          username: data.number,
+          password: data.number
+        }
+      };
+      request(options, function(error, response, body) {
+        console.log('Options while logging in: ', JSON.stringify(options));
+        if (error) throw new Error(error);
+        console.log(
+          "value of login response after post" + JSON.stringify(response)
+        );
+        res.redirect(
+          `${response.body}?scope=${data.scope}&client_id=${data.clientId}&redirect_uri=${data.redirectURI}&response_type=${data.responseType}&CustNo=${data.number}&CustEmail=${data.email}&state=${data.state}`
+        );
+          for (var member in data) delete data[member]
+      });
     });
   }else{
     checkNoExists.email = req.body.email;
     checkNoExists.fullname = req.body.name;
     await checkNoExists.save();
     // console.log("User details updated: ",userUpdate)
+    var options = {
+      method: "POST",
+      url: `${app_id}/login`,
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      form: {
+        username: data.number,
+        password: data.number
+      }
+    };
+    request(options, function(error, response, body) {
+      console.log('Options while logging in: ', JSON.stringify(options));
+      if (error) throw new Error(error);
+      console.log(
+        "value of login response after post" + JSON.stringify(response)
+      );
+      res.redirect(
+        `${response.body}?scope=${data.scope}&client_id=${data.clientId}&redirect_uri=${data.redirectURI}&response_type=${data.responseType}&CustNo=${data.number}&CustEmail=${data.email}&state=${data.state}`
+      );
+        for (var member in data) delete data[member]
+    });
   }
-  var options = {
-    method: "POST",
-    url: `${app_id}/login`,
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    form: {
-      username: data.number,
-      password: data.number
-    }
-  };
-  request(options, function(error, response, body) {
-    console.log('Options while logging in: ', JSON.stringify(options));
-    if (error) throw new Error(error);
-    console.log(
-      "value of login response after post" + JSON.stringify(response)
-    );
-    res.redirect(
-      `${app_id}/auth/start?scope=${data.scope}&client_id=${data.clientId}&redirect_uri=${data.redirectURI}&response_type=${data.responseType}&CustNo=${data.number}&CustEmail=${data.email}&state=${data.state}`
-    );
-      for (var member in data) delete data[member]
-  });
 }
   /* res.redirect(
     `${app_id}/auth/start?scope=${data.scope}&client_id=${data.clientId}&redirect_uri=${data.redirectURI}&response_type=${data.responseType}&CustNo=${data.number}&email=${data.email}&state=${data.state}`
