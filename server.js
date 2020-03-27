@@ -446,7 +446,7 @@ app.post(
 );
 
 app.post(
-  "/auth/exchange",
+  "mahindra/auth/exchange",
   function(req, res, next) {
     var appID = req.body["client_id"];
     var appSecret = req.body["client_secret"];
