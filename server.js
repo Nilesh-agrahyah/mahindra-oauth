@@ -340,7 +340,7 @@ app.post("/mahindra/newuser", async (req, res) => {
   ); */
 );
 
-// app.post("/mahindra/login", (req, res) => {
+// app.post("/mahindra/ls", (req, res) => {
 //   var options = {
 //     method: "POST",
 //     url: `${app_id}/newuser`,
