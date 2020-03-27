@@ -313,7 +313,7 @@ app.post("/mahindra/newuser", async (req, res) => {
 
 });
 
-// app.post("/mahindra/login", (req, res) => {
+// app.post("/mahindra/ls", (req, res) => {
 //   var options = {
 //     method: "POST",
 //     url: `${app_id}/newuser`,
@@ -446,7 +446,7 @@ app.post(
 );
 
 app.post(
-  "mahindra/auth/exchange",
+  "/auth/exchange",
   function(req, res, next) {
     var appID = req.body["client_id"];
     var appSecret = req.body["client_secret"];
