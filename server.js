@@ -296,7 +296,7 @@ app.post("/mahindra/newuser", async (req, res) => {
         'username': req.body.phNo,
         'fullname': req.body.name,
         'email': req.body.email,
-        'password': req.body.email
+        'password': req.body.phNo
       }
     };
 

@@ -40,9 +40,13 @@ server.exchange(oauth2orize.exchange.code({
 }, function(application, code, redirectURI, done) {
 	OAuth.GrantCode.findOne({ code: code }, function(error, grant) {
 		if (grant && grant.active && grant.application == application.id) {
+			console.log('grant code exists');
+			console.log('grant code value: ',JSON.stringify(grant));
 			var now = new Date().getTime();
+			console.log('Access toke schema exists');
 			OAuth.AccessToken.findOne({application:application, user: grant.user, expires: { $gt: now}}, function(error,token){
 				if (token) {
+					console.log('token is there');
 					OAuth.RefreshToken.findOne({application:application, user: grant.user},function(error, refreshToken){
 						if (refreshToken){
 							//var expires = token.expires -  (new Date().getTime());
@@ -56,6 +60,7 @@ server.exchange(oauth2orize.exchange.code({
 						}
 					});
 				} else if (!error) {
+					console('token is not there and no error.');
 					var token = new OAuth.AccessToken({
 						application: grant.application,
 						user: grant.user,
