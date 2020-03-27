@@ -327,7 +327,7 @@ app.post("/mahindra/newuser", async (req, res) => {
   request(options, function(error, response, body) {
     if (error) throw new Error(error);
     console.log(
-      "value of login response after post" + JSON.stringify(body)
+      "value of login response after post" + JSON.stringify(response)
     );
     res.redirect(
       `${app_id}/auth/start?scope=${data.scope}&client_id=${data.clientId}&redirect_uri=${data.redirectURI}&response_type=${data.responseType}&CustNo=${data.number}&CustEmail=${data.email}&state=${data.state}`
