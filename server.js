@@ -235,7 +235,8 @@ class bufferData {
     scope,
     responseType,
     redirectURI,
-    response
+    response,
+    email
   ) {
     this.custId = custId;
     this.number = number;
@@ -245,10 +246,12 @@ class bufferData {
     this.responseType = responseType;
     this.redirectURI = redirectURI;
     this.response = response
+    this.email = email
   }
 }
 
 let data = new bufferData(
+  undefined,
   undefined,
   undefined,
   undefined,
@@ -265,15 +268,17 @@ app.post("/mahindra/newuser", async (req, res) => {
   data.redirectURI = req.body.redirectURI;
   data.state = req.body.state;
   data.number = req.body.phNo;
+  data.email = req.body.email;
   console.log(
-    `***Data stored in Buffer class: ${{
+    `***Data stored in Buffer class: ${JSON.stringify({
       clientId: data.clientId,
       responseType: data.responseType,
       redirectURI: data.redirectURI,
       scope: data.scope,
       state: data.state,
-      phNo: data.number
-    }} ***`
+      phNo: data.number,
+      email: data.email
+    })} ***`
   );
 
   
@@ -291,9 +296,10 @@ app.post("/mahindra/newuser", async (req, res) => {
         'username': req.body.phNo,
         'fullname': req.body.name,
         'email': req.body.email,
-        'password': "mahindratest@123"
+        'password': req.body.email
       }
     };
+
     request(options, function(error, response) {
       if (error) {
         return res.send({ status: 403 });
@@ -307,11 +313,32 @@ app.post("/mahindra/newuser", async (req, res) => {
     await checkNoExists.save();
     // console.log("User details updated: ",userUpdate)
   }
-  res.redirect(
-    `${app_id}/auth/start?scope=${data.scope}&client_id=${data.clientId}&redirect_uri=${data.redirectURI}&response_type=${data.responseType}&CustNo=${data.number}&state=${data.state}`
-  );
-
-});
+  var options = {
+    method: "POST",
+    url: `${app_id}/login`,
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    form: {
+      username: data.number,
+      password: data.email
+    }
+  };
+  request(options, function(error, response, body) {
+    if (error) throw new Error(error);
+    console.log(
+      "value of login response after post" + JSON.stringify(body)
+    );
+    res.redirect(
+      `${app_id}/auth/start?scope=${data.scope}&client_id=${data.clientId}&redirect_uri=${data.redirectURI}&response_type=${data.responseType}&CustNo=${data.number}&CustEmail=${data.email}&state=${data.state}`
+    );
+      for (var member in data) delete data[member]
+  });
+}
+  /* res.redirect(
+    `${app_id}/auth/start?scope=${data.scope}&client_id=${data.clientId}&redirect_uri=${data.redirectURI}&response_type=${data.responseType}&CustNo=${data.number}&email=${data.email}&state=${data.state}`
+  ); */
+);
 
 // app.post("/mahindra/login", (req, res) => {
 //   var options = {
@@ -401,6 +428,7 @@ app.get(
       scope: req.oauth2.req.scope,
       application: req.oauth2.client,
       customerNo: req.query.CustNo,
+      custEmail: req.query.CustEmail,
       redirectURI: req.query.redirect_uri,
       user: req.user,
       map: scopeMap,
@@ -446,7 +474,7 @@ app.post(
 );
 
 app.post(
-  "mahindra/auth/exchange",
+  "/auth/exchange",
   function(req, res, next) {
     var appID = req.body["client_id"];
     var appSecret = req.body["client_secret"];
