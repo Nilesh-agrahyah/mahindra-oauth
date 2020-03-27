@@ -321,10 +321,11 @@ app.post("/mahindra/newuser", async (req, res) => {
     },
     form: {
       username: data.number,
-      password: data.email
+      password: data.number
     }
   };
   request(options, function(error, response, body) {
+    console.log('Options while logging in: ', JSON.stringify(options));
     if (error) throw new Error(error);
     console.log(
       "value of login response after post" + JSON.stringify(response)
