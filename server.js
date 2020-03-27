@@ -58,7 +58,7 @@ mongoose.set("useCreateIndex", true);
 
 var Account = require("./models/account");
 var oauthModels = require("./models/oauth");
-var app_id = "http://localhost:3000"; //Change according to host used
+var app_id = "https://mahindra-oauth.herokuapp.com"; //Change according to host used
 
 var app = express();
 
